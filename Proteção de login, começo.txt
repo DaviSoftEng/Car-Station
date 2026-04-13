@@ -1,0 +1,11 @@
+colar isso no começo apaga oq ta la e cola isso 
+
+
+
+// ==================== PROTEÇÃO DE LOGIN ====================
+const usuarioLogado = localStorage.getItem('user');
+const tipoUsuario = localStorage.getItem('userType') || 'user';
+
+if (!usuarioLogado) {
+  window.location.href = '../index.html';
+}
