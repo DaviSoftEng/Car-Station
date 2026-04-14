@@ -1,3 +1,6 @@
+/* ==================== UTILITÁRIOS ==================== */
+.hidden { display: none !important; }
+
 /* ==================== RESET ==================== */
 * {
   margin: 0;
@@ -6,7 +9,8 @@
   font-family: 'Poppins', sans-serif;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   width: 100%;
 }
@@ -201,6 +205,7 @@ body {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -625,6 +630,7 @@ body {
     transform: translateY(100px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;

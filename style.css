@@ -72,6 +72,7 @@ body {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -133,8 +134,8 @@ body {
   font-weight: 400;
 }
 
-.input-group input:focus + label,
-.input-group input:valid + label {
+.input-group input:focus+label,
+.input-group input:valid+label {
   top: -8px;
   left: 12px;
   font-size: 11px;
@@ -193,9 +194,19 @@ body {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
 }
 
 .error-message::before {
@@ -252,7 +263,9 @@ body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ==================== HELP TEXT ==================== */
@@ -317,8 +330,8 @@ body {
     left: 14px;
   }
 
-  .input-group input:focus + label,
-  .input-group input:valid + label {
+  .input-group input:focus+label,
+  .input-group input:valid+label {
     left: 10px;
   }
 

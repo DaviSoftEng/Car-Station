@@ -108,15 +108,19 @@ function mostrarSecao(secaoId) {
   sidebar.classList.remove('mobile-open');
   sidebar.classList.add('mobile-closed');
 
-  // Esconder todas as seções
+  // Esconder todas as seções e limpar layout de iframe
   document.querySelectorAll('.conteudo').forEach(secao => {
     secao.classList.add('hidden');
+    secao.classList.remove('showing-iframe');
   });
 
-  // Mostrar seção selecionada
+  // Mostrar seção selecionada e aplicar layout de iframe se configurado
   const secao = document.getElementById(secaoId);
   if (secao) {
     secao.classList.remove('hidden');
+    if (dashboardConfigs[secaoId]) {
+      secao.classList.add('showing-iframe');
+    }
   }
 
   // Atualizar menu ativo
@@ -388,7 +392,6 @@ function extrairUrl(input) {
 }
 
 function aplicarIframe(secao, url) {
-  const section = document.getElementById(secao);
   const container = document.getElementById(`iframe-${secao}`);
   const placeholder = document.getElementById(`placeholder-${secao}`);
   const sectionHeader = document.getElementById(`section-header-${secao}`);
@@ -406,13 +409,11 @@ function aplicarIframe(secao, url) {
     container.classList.remove('hidden');
     if (placeholder) placeholder.classList.add('hidden');
     if (sectionHeader) sectionHeader.classList.add('hidden');
-    if (section) section.classList.add('showing-iframe');
   } else {
     container.innerHTML = '';
     container.classList.add('hidden');
     if (placeholder) placeholder.classList.remove('hidden');
     if (sectionHeader) sectionHeader.classList.remove('hidden');
-    if (section) section.classList.remove('showing-iframe');
   }
 }
 
@@ -504,6 +505,13 @@ async function salvarDashboard(secao) {
       dashboardConfigs[secao] = url;
       aplicarIframe(secao, url);
       atualizarStatusConfig(secao, url);
+
+      // Atualiza layout se a seção estiver visível no momento
+      const secaoEl = document.getElementById(secao);
+      if (secaoEl && !secaoEl.classList.contains('hidden')) {
+        if (url) secaoEl.classList.add('showing-iframe');
+        else secaoEl.classList.remove('showing-iframe');
+      }
 
       closeDashConfig(secao);
       showNotification(
