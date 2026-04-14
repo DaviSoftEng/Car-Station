@@ -52,6 +52,22 @@ async function initDatabase() {
     `);
         console.log('✅ Tabela "users" pronta');
 
+        await query(`
+            CREATE TABLE IF NOT EXISTS dashboards (
+                id SERIAL PRIMARY KEY,
+                secao VARCHAR(50) UNIQUE NOT NULL,
+                iframe_url TEXT,
+                atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log('✅ Tabela "dashboards" pronta');
+
+        await query(`
+            INSERT INTO dashboards (secao) VALUES ('vendas'), ('financeiro'), ('estoque')
+            ON CONFLICT (secao) DO NOTHING;
+        `);
+        console.log('✅ Seções de dashboard inicializadas');
+
         const userExists = await query(
             'SELECT * FROM users WHERE username = $1',
             ['admin']

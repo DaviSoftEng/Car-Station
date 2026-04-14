@@ -5,9 +5,9 @@ const cors = require('cors');
 
 const { initDatabase } = require('./src/config/database');
 
-// 🔥 NOVAS ROTAS
 const authRoutes = require('./src/routes/auth');
 const userRoutes = require('./src/routes/users');
+const dashboardRoutes = require('./src/routes/dashboards');
 
 const { authMiddleware } = require('./src/middleware/auth');
 
@@ -25,6 +25,7 @@ app.get('/', (req, res) => {
 // ==================== ROTAS PRINCIPAIS ====================
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/dashboards', dashboardRoutes);
 
 // ==================== ROTA PROTEGIDA 🔐 ====================
 app.get('/api/dashboard', authMiddleware, (req, res) => {

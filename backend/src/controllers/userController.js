@@ -120,8 +120,93 @@ async function deletarUsuario(req, res) {
     }
 }
 
+// ==================== EDITAR USUÁRIO ====================
+async function editarUsuario(req, res) {
+    try {
+        const { id } = req.params;
+        const { password, tipo } = req.body;
+
+        const usuarioExiste = await query(
+            'SELECT id, username, tipo FROM users WHERE id = $1',
+            [id]
+        );
+
+        if (usuarioExiste.rows.length === 0) {
+            return res.status(404).json({
+                sucesso: false,
+                mensagem: 'Usuário não encontrado',
+            });
+        }
+
+        if (tipo && !['gestor', 'admin'].includes(tipo)) {
+            return res.status(400).json({
+                sucesso: false,
+                mensagem: 'Tipo inválido',
+            });
+        }
+
+        // Admin não pode rebaixar a própria conta
+        if (req.usuario.id === parseInt(id) && tipo && tipo !== req.usuario.tipo) {
+            return res.status(403).json({
+                sucesso: false,
+                mensagem: 'Você não pode alterar seu próprio tipo',
+            });
+        }
+
+        const campos = [];
+        const valores = [];
+        let i = 1;
+
+        if (password) {
+            if (password.length < 3) {
+                return res.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Senha deve ter no mínimo 3 caracteres',
+                });
+            }
+            const senhaHasheada = await bcrypt.hash(password, 10);
+            campos.push(`password = $${i++}`);
+            valores.push(senhaHasheada);
+        }
+
+        if (tipo) {
+            campos.push(`tipo = $${i++}`);
+            valores.push(tipo);
+        }
+
+        if (campos.length === 0) {
+            return res.status(400).json({
+                sucesso: false,
+                mensagem: 'Nenhum campo para atualizar',
+            });
+        }
+
+        campos.push(`atualizado_em = CURRENT_TIMESTAMP`);
+        valores.push(id);
+
+        await query(
+            `UPDATE users SET ${campos.join(', ')} WHERE id = $${i}`,
+            valores
+        );
+
+        console.log(`✅ Usuário editado: ${usuarioExiste.rows[0].username}`);
+        return res.status(200).json({
+            sucesso: true,
+            mensagem: 'Usuário atualizado com sucesso',
+        });
+
+    } catch (error) {
+        console.error('❌ Erro ao editar usuário:', error);
+        return res.status(500).json({
+            sucesso: false,
+            mensagem: 'Erro ao editar usuário',
+        });
+    }
+}
+
 module.exports = {
     listarUsuarios,
     criarUsuario,
+    editarUsuario,
     deletarUsuario,
 };
