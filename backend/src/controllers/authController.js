@@ -54,6 +54,8 @@ async function login(req, res) {
 
         const token = gerarToken(usuario);
 
+        await query('UPDATE users SET ultimo_login = NOW() WHERE id = $1', [usuario.id]);
+
         console.log(`✅ Login bem-sucedido: ${username}`);
         return res.status(200).json({
             sucesso: true,

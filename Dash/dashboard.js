@@ -256,13 +256,19 @@ async function listarUsuarios() {
 
     container.innerHTML = users.map(u => {
       const podeRemover = u.username !== usuarioLogado;
+      const ultimoLogin = u.ultimo_login
+        ? new Date(u.ultimo_login).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+        : 'Nunca acessou';
       return `
         <div class="user-item">
           <div class="user-item-info">
-            <span class="user-item-name">👤 ${u.username}</span>
-            <span class="user-item-type ${u.tipo === 'admin' ? 'admin' : 'user'}">
-              ${u.tipo === 'admin' ? '👨‍💼 Admin' : '📊 Gestor(a)'}
-            </span>
+            <div class="user-item-main">
+              <span class="user-item-name">👤 ${u.username}</span>
+              <span class="user-item-type ${u.tipo === 'admin' ? 'admin' : 'user'}">
+                ${u.tipo === 'admin' ? '👨‍💼 Admin' : '📊 Gestor(a)'}
+              </span>
+            </div>
+            <span class="user-item-login">Último acesso: ${ultimoLogin}</span>
           </div>
           <div class="user-item-actions">
             <button class="btn-edit" onclick="abrirEditarUsuario(${u.id}, '${u.username}', '${u.tipo}')">

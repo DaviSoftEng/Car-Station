@@ -53,6 +53,11 @@ async function initDatabase() {
         console.log('✅ Tabela "users" pronta');
 
         await query(`
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS ultimo_login TIMESTAMP;
+        `);
+        console.log('✅ Coluna "ultimo_login" pronta');
+
+        await query(`
             CREATE TABLE IF NOT EXISTS dashboards (
                 id SERIAL PRIMARY KEY,
                 secao VARCHAR(50) UNIQUE NOT NULL,

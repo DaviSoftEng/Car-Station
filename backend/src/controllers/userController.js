@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 async function listarUsuarios(req, res) {
     try {
         const resultado = await query(
-            'SELECT id, username, tipo, email, criado_em FROM users ORDER BY criado_em DESC'
+            'SELECT id, username, tipo, email, criado_em, ultimo_login FROM users ORDER BY criado_em DESC'
         );
 
         return res.status(200).json({

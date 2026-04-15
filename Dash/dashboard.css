@@ -440,9 +440,20 @@ body {
 
 .user-item-info {
   display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.user-item-main {
+  display: flex;
   align-items: center;
   gap: 12px;
-  flex: 1;
+}
+
+.user-item-login {
+  font-size: 11px;
+  color: #999;
 }
 
 .user-item-name {
