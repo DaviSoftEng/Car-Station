@@ -124,7 +124,7 @@ async function deletarUsuario(req, res) {
 async function editarUsuario(req, res) {
     try {
         const { id } = req.params;
-        const { password, tipo } = req.body;
+        const { password, tipo, username } = req.body;
 
         const usuarioExiste = await query(
             'SELECT id, username, tipo FROM users WHERE id = $1',
@@ -156,6 +156,18 @@ async function editarUsuario(req, res) {
         const campos = [];
         const valores = [];
         let i = 1;
+
+        if (username) {
+            if (username.length < 3) {
+                return res.status(400).json({ sucesso: false, mensagem: 'Usuário deve ter no mínimo 3 caracteres' });
+            }
+            const usuarioJaExiste = await query('SELECT id FROM users WHERE username = $1 AND id != $2', [username, id]);
+            if (usuarioJaExiste.rows.length > 0) {
+                return res.status(409).json({ sucesso: false, mensagem: 'Nome de usuário já está em uso' });
+            }
+            campos.push(`username = $${i++}`);
+            valores.push(username);
+        }
 
         if (password) {
             if (password.length < 3) {
@@ -204,9 +216,53 @@ async function editarUsuario(req, res) {
     }
 }
 
+// ==================== LISTAR PERMISSÕES DO USUÁRIO ====================
+async function listarPermissoes(req, res) {
+    try {
+        const { id } = req.params;
+        const resultado = await query(
+            'SELECT dashboard_id FROM user_dashboard_permissions WHERE user_id = $1',
+            [id]
+        );
+        return res.status(200).json({
+            sucesso: true,
+            permissoes: resultado.rows.map(r => r.dashboard_id),
+        });
+    } catch (error) {
+        console.error('❌ Erro ao listar permissões:', error);
+        return res.status(500).json({ sucesso: false, mensagem: 'Erro ao listar permissões' });
+    }
+}
+
+// ==================== SALVAR PERMISSÕES DO USUÁRIO ====================
+async function salvarPermissoes(req, res) {
+    try {
+        const { id } = req.params;
+        const { dashboard_ids } = req.body;
+
+        await query('DELETE FROM user_dashboard_permissions WHERE user_id = $1', [id]);
+
+        if (Array.isArray(dashboard_ids) && dashboard_ids.length > 0) {
+            for (const dashId of dashboard_ids) {
+                await query(
+                    'INSERT INTO user_dashboard_permissions (user_id, dashboard_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                    [id, dashId]
+                );
+            }
+        }
+
+        return res.status(200).json({ sucesso: true, mensagem: 'Permissões atualizadas' });
+    } catch (error) {
+        console.error('❌ Erro ao salvar permissões:', error);
+        return res.status(500).json({ sucesso: false, mensagem: 'Erro ao salvar permissões' });
+    }
+}
+
 module.exports = {
     listarUsuarios,
     criarUsuario,
     editarUsuario,
     deletarUsuario,
+    listarPermissoes,
+    salvarPermissoes,
 };

@@ -25,7 +25,7 @@ async function validarSessao() {
 }
 
 // ==================== API ====================
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = window.API_BASE_URL || 'http://localhost:3001/api';
 
 function getAuthHeaders() {
   return {
@@ -37,6 +37,10 @@ function getAuthHeaders() {
 // ==================== VARIÁVEIS GLOBAIS ====================
 let confirmacaoPendente = null;
 let users = [];
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 // ==================== NOTIFICAÇÕES (TOAST) ====================
 function showNotification(message, type = 'success') {
@@ -101,41 +105,145 @@ function aplicarPermissoes() {
   }
 }
 
+// ==================== CONFIG BOX ACCORDION ====================
+function toggleConfigBox(id) {
+  const body = document.getElementById(`body-${id}`);
+  const arrow = document.getElementById(`arrow-${id}`);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  arrow.classList.toggle('open', !isOpen);
+}
+
+// ==================== PESQUISA ====================
+function pesquisarDashboard(termo) {
+  const resultados = document.getElementById('searchResults');
+  const termoBusca = termo.trim().toLowerCase();
+
+  if (!termoBusca) {
+    resultados.classList.add('hidden');
+    resultados.innerHTML = '';
+    return;
+  }
+
+  const ICONES = { vendas: '📊', financeiro: '💰', estoque: '📦' };
+  const encontrados = [];
+
+  Object.entries(dashboardsData).forEach(([secao, dashes]) => {
+    dashes.forEach(d => {
+      if (d.nome && d.nome.toLowerCase().includes(termoBusca)) {
+        encontrados.push({ ...d, secao });
+      }
+    });
+  });
+
+  if (encontrados.length === 0) {
+    resultados.innerHTML = '<div class="search-result-empty">Nenhum dashboard encontrado</div>';
+  } else {
+    resultados.innerHTML = encontrados.map(d =>
+      `<div class="search-result-item" onclick="selecionarDashboardBusca(${d.id}, '${d.secao}')">${ICONES[d.secao]} ${d.nome}</div>`
+    ).join('');
+  }
+
+  resultados.classList.remove('hidden');
+}
+
+function selecionarDashboardBusca(id, secao) {
+  abrirDashboardItem(id, secao);
+  abrirMenuSection(secao);
+  document.getElementById('searchDash').value = '';
+  document.getElementById('searchResults').classList.add('hidden');
+  document.getElementById('searchResults').innerHTML = '';
+}
+
 // ==================== NAVEGAÇÃO ====================
 function mostrarSecao(secaoId) {
-  // Fechar menu mobile
   const sidebar = document.querySelector('.sidebar');
   sidebar.classList.remove('mobile-open');
   sidebar.classList.add('mobile-closed');
 
-  // Esconder todas as seções e limpar layout de iframe
   document.querySelectorAll('.conteudo').forEach(secao => {
     secao.classList.add('hidden');
     secao.classList.remove('showing-iframe');
   });
 
-  // Mostrar seção selecionada e aplicar layout de iframe se configurado
   const secao = document.getElementById(secaoId);
   if (secao) {
-    secao.classList.remove('hidden');
-    if (dashboardConfigs[secaoId]) {
-      secao.classList.add('showing-iframe');
-    }
+    secao.classList.remove('hidden', 'fade-in');
+    void secao.offsetWidth; // força reflow pra reiniciar a animação
+    secao.classList.add('fade-in');
   }
 
-  // Atualizar menu ativo
-  document.querySelectorAll('.menu a, .bottom-menu a').forEach(link => {
-    link.classList.remove('active');
-  });
-
+  document.querySelectorAll('.menu a, .bottom-menu a').forEach(link => link.classList.remove('active'));
   const linkAtivo = document.querySelector(`[onclick="mostrarSecao('${secaoId}')"]`);
-  if (linkAtivo) {
-    linkAtivo.classList.add('active');
+  if (linkAtivo) linkAtivo.classList.add('active');
+}
+
+
+// ==================== SIDEBAR ACCORDION ====================
+const SECOES_INFO = [
+  { id: 'vendas', nome: 'Vendas', icone: '📊' },
+  { id: 'financeiro', nome: 'Financeiro', icone: '💰' },
+  { id: 'estoque', nome: 'Estoque', icone: '📦' }
+];
+
+function abrirMenuSection(secao) {
+  const section = document.getElementById(`menu-section-${secao}`);
+  const arrow = document.getElementById(`menu-arrow-${secao}`);
+  if (section && !section.classList.contains('open')) {
+    section.classList.add('open');
+    if (arrow) arrow.classList.add('open');
   }
 }
 
-function abrirDashboard(nome) {
-  mostrarSecao(nome);
+function toggleMenuSection(secao) {
+  const section = document.getElementById(`menu-section-${secao}`);
+  const arrow = document.getElementById(`menu-arrow-${secao}`);
+  if (!section) return;
+
+  const isOpen = section.classList.contains('open');
+
+  // Fecha todas
+  SECOES_INFO.forEach(s => {
+    document.getElementById(`menu-section-${s.id}`)?.classList.remove('open');
+    document.getElementById(`menu-arrow-${s.id}`)?.classList.remove('open');
+  });
+
+  if (!isOpen) {
+    section.classList.add('open');
+    if (arrow) arrow.classList.add('open');
+  }
+}
+
+function abrirDashboardItem(id, secao) {
+  const dash = (dashboardsData[secao] || []).find(d => d.id === id);
+  if (!dash) return;
+
+  mostrarSecao(secao);
+  aplicarIframe(secao, dash.iframe_url);
+
+  // Marca sub-item ativo
+  document.querySelectorAll('.menu-subitem').forEach(el => el.classList.remove('active'));
+  document.getElementById(`subitem-${id}`)?.classList.add('active');
+
+  // Marca seção ativa no header
+  document.querySelectorAll('.menu-section-header').forEach(el => el.classList.remove('active'));
+  document.querySelector(`#menu-section-${secao} .menu-section-header`)?.classList.add('active');
+}
+
+function renderizarSubmenus() {
+  SECOES_INFO.forEach(({ id: secao }) => {
+    const submenu = document.getElementById(`menu-submenu-${secao}`);
+    if (!submenu) return;
+    const dashes = dashboardsData[secao] || [];
+
+    if (dashes.length === 0) {
+      submenu.innerHTML = '<div class="menu-submenu-empty">Nenhum dashboard</div>';
+    } else {
+      submenu.innerHTML = dashes.map(d =>
+        `<a class="menu-subitem" id="subitem-${d.id}" onclick="abrirDashboardItem(${d.id}, '${secao}')">→ ${d.nome}</a>`
+      ).join('');
+    }
+  });
 }
 
 // ==================== MENU MOBILE ====================
@@ -263,7 +371,7 @@ async function listarUsuarios() {
         <div class="user-item">
           <div class="user-item-info">
             <div class="user-item-main">
-              <span class="user-item-name">👤 ${u.username}</span>
+              <span class="user-item-name">👤 ${escapeHtml(u.username)}</span>
               <span class="user-item-type ${u.tipo === 'admin' ? 'admin' : 'user'}">
                 ${u.tipo === 'admin' ? '👨‍💼 Admin' : '📊 Gestor(a)'}
               </span>
@@ -293,17 +401,54 @@ async function listarUsuarios() {
 // ==================== EDITAR USUÁRIO ====================
 let editandoUsuarioId = null;
 
-function abrirEditarUsuario(id, username, tipo) {
+async function abrirEditarUsuario(id, username, tipo) {
   editandoUsuarioId = id;
   document.getElementById('editUserName').textContent = `👤 ${username}`;
+  document.getElementById('editUserUsername').value = username;
   document.getElementById('editUserPassword').value = '';
   document.getElementById('editUserTipo').value = tipo;
-
-  // Não deixa o admin mudar o próprio tipo
   document.getElementById('editUserTipo').disabled = (username === usuarioLogado);
 
+  // Permissões: só mostra pra gestores
+  const permissoesGroup = document.getElementById('permissoesGroup');
+  const checklist = document.getElementById('permissoesChecklist');
+
+  if (tipo === 'gestor') {
+    permissoesGroup.classList.remove('hidden');
+    checklist.innerHTML = '<p style="font-size:12px;color:#999;">Carregando...</p>';
+
+    try {
+      const [resDashes, resPerms] = await Promise.all([
+        fetch(`${API_BASE}/dashboards`, { headers: getAuthHeaders() }),
+        fetch(`${API_BASE}/users/${id}/permissoes`, { headers: getAuthHeaders() })
+      ]);
+
+      const dataDashes = await resDashes.json();
+      const dataPerms = await resPerms.json();
+
+      const todosOsDashes = dataDashes.sucesso ? dataDashes.dashboards.filter(d => d.iframe_url) : [];
+      const permitidos = dataPerms.sucesso ? dataPerms.permissoes : [];
+
+      if (todosOsDashes.length === 0) {
+        checklist.innerHTML = '<p style="font-size:12px;color:#999;font-style:italic;">Nenhum dashboard cadastrado ainda</p>';
+      } else {
+        const ICONES = { vendas: '📊', financeiro: '💰', estoque: '📦' };
+        checklist.innerHTML = todosOsDashes.map(d => `
+          <label class="permissao-item">
+            <input type="checkbox" value="${d.id}" ${permitidos.includes(d.id) ? 'checked' : ''}>
+            <span>${ICONES[d.secao] || '📋'} ${d.nome}</span>
+          </label>
+        `).join('');
+      }
+    } catch {
+      checklist.innerHTML = '<p style="font-size:12px;color:#e74c3c;">Erro ao carregar dashboards</p>';
+    }
+  } else {
+    permissoesGroup.classList.add('hidden');
+  }
+
   document.getElementById('editUserModal').classList.remove('hidden');
-  document.getElementById('editUserPassword').focus();
+  document.getElementById('editUserUsername').focus();
 }
 
 function fecharEditarUsuario() {
@@ -314,11 +459,12 @@ function fecharEditarUsuario() {
 async function salvarEdicaoUsuario() {
   if (!editandoUsuarioId) return;
 
+  const username = document.getElementById('editUserUsername').value.trim();
   const password = document.getElementById('editUserPassword').value;
   const tipo = document.getElementById('editUserTipo').value;
 
-  if (!password && !tipo) {
-    showNotification('Nenhum campo preenchido', 'error');
+  if (username && username.length < 3) {
+    showNotification('Usuário deve ter no mínimo 3 caracteres', 'error');
     return;
   }
 
@@ -328,6 +474,7 @@ async function salvarEdicaoUsuario() {
 
   try {
     const body = { tipo };
+    if (username) body.username = username;
     if (password) body.password = password;
 
     const response = await fetch(`${API_BASE}/users/${editandoUsuarioId}`, {
@@ -339,6 +486,18 @@ async function salvarEdicaoUsuario() {
     const data = await response.json();
 
     if (data.sucesso) {
+      // Salvar permissões se for gestor
+      const permissoesGroup = document.getElementById('permissoesGroup');
+      if (!permissoesGroup.classList.contains('hidden')) {
+        const checkboxes = document.querySelectorAll('#permissoesChecklist input[type="checkbox"]');
+        const dashboard_ids = Array.from(checkboxes).filter(c => c.checked).map(c => parseInt(c.value));
+        await fetch(`${API_BASE}/users/${editandoUsuarioId}/permissoes`, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ dashboard_ids })
+        });
+      }
+
       fecharEditarUsuario();
       showNotification('Usuário atualizado com sucesso!', 'success');
       await listarUsuarios();
@@ -385,9 +544,8 @@ async function removerUsuario(id, username) {
 }
 
 // ==================== DASHBOARDS POWER BI ====================
-let dashboardConfigs = {};
+let dashboardsData = { vendas: [], financeiro: [], estoque: [] };
 
-// Extrai só a URL caso o usuário cole o código iframe completo
 function extrairUrl(input) {
   const trimmed = input.trim();
   if (trimmed.toLowerCase().startsWith('<iframe')) {
@@ -401,6 +559,7 @@ function aplicarIframe(secao, url) {
   const container = document.getElementById(`iframe-${secao}`);
   const placeholder = document.getElementById(`placeholder-${secao}`);
   const sectionHeader = document.getElementById(`section-header-${secao}`);
+  const secaoEl = document.getElementById(secao);
 
   if (!container) return;
 
@@ -415,125 +574,177 @@ function aplicarIframe(secao, url) {
     container.classList.remove('hidden');
     if (placeholder) placeholder.classList.add('hidden');
     if (sectionHeader) sectionHeader.classList.add('hidden');
+    if (secaoEl) secaoEl.classList.add('showing-iframe');
   } else {
     container.innerHTML = '';
     container.classList.add('hidden');
     if (placeholder) placeholder.classList.remove('hidden');
     if (sectionHeader) sectionHeader.classList.remove('hidden');
-  }
-}
-
-function atualizarStatusConfig(secao, url) {
-  const status = document.getElementById(`dash-status-${secao}`);
-  if (!status) return;
-
-  if (url) {
-    status.textContent = 'Configurado';
-    status.className = 'dash-status configured';
-  } else {
-    status.textContent = 'Não configurado';
-    status.className = 'dash-status not-configured';
+    if (secaoEl) secaoEl.classList.remove('showing-iframe');
   }
 }
 
 async function carregarDashboards() {
   try {
-    const response = await fetch(`${API_BASE}/dashboards`, {
-      headers: getAuthHeaders()
-    });
-
+    const response = await fetch(`${API_BASE}/dashboards`, { headers: getAuthHeaders() });
     if (!response.ok) return;
 
     const data = await response.json();
     if (!data.sucesso) return;
 
+    dashboardsData = { vendas: [], financeiro: [], estoque: [] };
     data.dashboards.forEach(d => {
-      dashboardConfigs[d.secao] = d.iframe_url;
-      aplicarIframe(d.secao, d.iframe_url);
-
-      const input = document.getElementById(`dash-url-${d.secao}`);
-      if (input) input.value = d.iframe_url || '';
-
-      atualizarStatusConfig(d.secao, d.iframe_url);
+      if (dashboardsData[d.secao]) dashboardsData[d.secao].push(d);
     });
+
+    renderizarSubmenus();
+    renderizarInicio();
+    renderizarConfigDashboards();
 
   } catch (error) {
     console.error('Erro ao carregar dashboards:', error);
   }
 }
 
-// ==================== ACCORDION ====================
-const SECOES_DASH = ['vendas', 'financeiro', 'estoque'];
+// ==================== TELA INICIAL ====================
+function renderizarInicio() {
+  SECOES_INFO.forEach(({ id: secao }) => {
+    const container = document.getElementById(`inicio-list-${secao}`);
+    if (!container) return;
 
-function closeDashConfig(secao) {
-  document.getElementById(`acc-body-${secao}`)?.classList.remove('open');
-  document.getElementById(`arrow-${secao}`)?.classList.remove('open');
-  document.getElementById(`acc-${secao}`)?.classList.remove('open');
+    const dashes = (dashboardsData[secao] || []).filter(d => d.iframe_url);
+
+    if (dashes.length === 0) {
+      container.innerHTML = '<div class="inicio-empty">Nenhum dashboard disponível</div>';
+    } else {
+      container.innerHTML = dashes.map(d =>
+        `<div class="inicio-dash-item" onclick="abrirDashboardItem(${d.id}, '${secao}'); abrirMenuSection('${secao}')">
+          → ${d.nome}
+        </div>`
+      ).join('');
+    }
+  });
 }
 
-function toggleDashConfig(secao) {
-  const isOpen = document.getElementById(`acc-body-${secao}`).classList.contains('open');
-  SECOES_DASH.forEach(s => closeDashConfig(s));
-  if (!isOpen) {
-    document.getElementById(`acc-body-${secao}`).classList.add('open');
-    document.getElementById(`arrow-${secao}`).classList.add('open');
-    document.getElementById(`acc-${secao}`).classList.add('open');
+// ==================== CONFIG PANEL (ADMIN) ====================
+function renderizarConfigDashboards() {
+  const container = document.getElementById('dashConfigContent');
+  if (!container || tipoUsuario !== 'admin') return;
+
+  container.innerHTML = SECOES_INFO.map(({ id: secao, nome, icone }) => {
+    const dashes = dashboardsData[secao] || [];
+    return `
+      <div class="dash-config-section">
+        <div class="dash-config-section-header">
+          <span>${icone} ${nome}</span>
+          <button class="btn-add-dash" onclick="toggleAddForm('${secao}')">+ Adicionar</button>
+        </div>
+        <div class="dash-list" id="dash-list-${secao}">
+          ${dashes.length === 0
+            ? '<p class="dash-list-empty">Nenhum dashboard configurado</p>'
+            : dashes.map(d => `
+              <div class="dash-list-item">
+                <div class="dash-list-item-info">
+                  <span class="dash-list-item-nome">${d.nome}</span>
+                  <span class="dash-list-item-status">${d.iframe_url ? '✓ URL configurada' : '⚠ Sem URL'}</span>
+                </div>
+                <button class="btn-remove-dash" onclick="confirmarDeletarDashboard(${d.id}, '${d.nome}', '${secao}')">Remover</button>
+              </div>`).join('')
+          }
+        </div>
+        <div class="dash-add-form hidden" id="dash-add-form-${secao}">
+          <input type="text" id="dash-add-nome-${secao}" class="dash-input" placeholder="Nome do dashboard">
+          <input type="text" id="dash-add-url-${secao}" class="dash-input" placeholder="Link ou código iframe do Power BI">
+          <div class="dash-add-actions">
+            <button class="btn-save-dash" onclick="criarDashboard('${secao}')">Salvar</button>
+            <button class="btn-cancel-dash" onclick="cancelarAddForm('${secao}')">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleAddForm(secao) {
+  const form = document.getElementById(`dash-add-form-${secao}`);
+  if (!form) return;
+  form.classList.toggle('hidden');
+  if (!form.classList.contains('hidden')) {
+    document.getElementById(`dash-add-nome-${secao}`)?.focus();
   }
 }
 
-async function removerDashboard(secao) {
-  const input = document.getElementById(`dash-url-${secao}`);
-  if (input) input.value = '';
-  await salvarDashboard(secao);
+function cancelarAddForm(secao) {
+  const form = document.getElementById(`dash-add-form-${secao}`);
+  if (form) form.classList.add('hidden');
+  if (document.getElementById(`dash-add-nome-${secao}`)) document.getElementById(`dash-add-nome-${secao}`).value = '';
+  if (document.getElementById(`dash-add-url-${secao}`)) document.getElementById(`dash-add-url-${secao}`).value = '';
 }
 
-async function salvarDashboard(secao) {
-  const input = document.getElementById(`dash-url-${secao}`);
-  if (!input) return;
+async function criarDashboard(secao) {
+  const nome = document.getElementById(`dash-add-nome-${secao}`)?.value.trim();
+  const urlRaw = document.getElementById(`dash-add-url-${secao}`)?.value.trim();
+  const url = extrairUrl(urlRaw || '');
 
-  const url = extrairUrl(input.value);
+  if (!nome) {
+    showNotification('Informe o nome do dashboard', 'error');
+    return;
+  }
 
-  const btn = input.closest('.dash-accordion-body-inner').querySelector('.btn-save-dash');
+  const btn = document.querySelector(`#dash-add-form-${secao} .btn-save-dash`);
   btn.disabled = true;
   btn.textContent = 'Salvando...';
 
   try {
     const response = await fetch(`${API_BASE}/dashboards/${secao}`, {
-      method: 'PUT',
+      method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ iframe_url: url })
+      body: JSON.stringify({ nome, iframe_url: url || null })
     });
 
     const data = await response.json();
 
     if (data.sucesso) {
-      input.value = url;
-      dashboardConfigs[secao] = url;
-      aplicarIframe(secao, url);
-      atualizarStatusConfig(secao, url);
-
-      // Atualiza layout se a seção estiver visível no momento
-      const secaoEl = document.getElementById(secao);
-      if (secaoEl && !secaoEl.classList.contains('hidden')) {
-        if (url) secaoEl.classList.add('showing-iframe');
-        else secaoEl.classList.remove('showing-iframe');
-      }
-
-      closeDashConfig(secao);
-      showNotification(
-        url ? `Dashboard "${secao}" configurado com sucesso!` : `Dashboard "${secao}" removido`,
-        url ? 'success' : 'info'
-      );
+      showNotification(`Dashboard "${nome}" adicionado!`, 'success');
+      await carregarDashboards();
+      cancelarAddForm(secao);
     } else {
-      showNotification(data.mensagem || 'Erro ao salvar', 'error');
+      showNotification(data.mensagem || 'Erro ao criar dashboard', 'error');
     }
-
-  } catch (error) {
-    console.error('Erro ao salvar dashboard:', error);
+  } catch {
     showNotification('Erro de conexão com o servidor', 'error');
   } finally {
     btn.disabled = false;
     btn.textContent = 'Salvar';
+  }
+}
+
+function confirmarDeletarDashboard(id, nome, secao) {
+  abrirConfirmacao(
+    'Remover dashboard',
+    `Tem certeza que deseja remover "${nome}"?`,
+    () => deletarDashboard(id, secao)
+  );
+}
+
+async function deletarDashboard(id, secao) {
+  try {
+    const response = await fetch(`${API_BASE}/dashboards/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+
+    const data = await response.json();
+
+    if (data.sucesso) {
+      showNotification('Dashboard removido', 'info');
+      await carregarDashboards();
+      aplicarIframe(secao, null);
+    } else {
+      showNotification(data.mensagem || 'Erro ao remover', 'error');
+    }
+  } catch {
+    showNotification('Erro de conexão com o servidor', 'error');
   }
 }
 
@@ -557,6 +768,8 @@ window.addEventListener('DOMContentLoaded', async function () {
 
   // Atualizar UI
   document.getElementById('username').textContent = usuarioLogado;
+  const welcomeEl = document.getElementById('welcomeName');
+  if (welcomeEl) welcomeEl.textContent = usuarioLogado;
 
   // Aplicar permissões
   aplicarPermissoes();
@@ -604,10 +817,4 @@ document.addEventListener('click', function (event) {
   }
 });
 
-// Prevenir logout acidental - avisar se tentar fechar a aba
-window.addEventListener('beforeunload', function (e) {
-  // Descomente para avisar ao sair
-  // e.preventDefault();
-  // e.returnValue = '';
-});
 

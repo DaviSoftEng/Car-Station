@@ -4,10 +4,9 @@ const router = express.Router();
 const dashboardController = require('../controllers/dashboardController');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 
-// Qualquer usuário autenticado pode ver os dashboards configurados
 router.get('/', authMiddleware, dashboardController.listarDashboards);
-
-// Apenas admin pode configurar os links
-router.put('/:secao', authMiddleware, adminMiddleware, dashboardController.atualizarDashboard);
+router.post('/:secao', authMiddleware, adminMiddleware, dashboardController.criarDashboard);
+router.put('/:id', authMiddleware, adminMiddleware, dashboardController.atualizarDashboard);
+router.delete('/:id', authMiddleware, adminMiddleware, dashboardController.deletarDashboard);
 
 module.exports = router;

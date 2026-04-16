@@ -16,4 +16,8 @@ router.put('/:id', authMiddleware, adminMiddleware, userController.editarUsuario
 // ==================== DELETAR USUÁRIO (APENAS ADMIN) ====================
 router.delete('/:id', authMiddleware, adminMiddleware, userController.deletarUsuario);
 
+// ==================== PERMISSÕES DE DASHBOARD (APENAS ADMIN) ====================
+router.get('/:id/permissoes', authMiddleware, adminMiddleware, userController.listarPermissoes);
+router.put('/:id/permissoes', authMiddleware, adminMiddleware, userController.salvarPermissoes);
+
 module.exports = router;

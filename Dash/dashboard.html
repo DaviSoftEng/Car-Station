@@ -28,10 +28,30 @@
 
             <nav class="menu">
                 <a class="menu-item inicio" onclick="mostrarSecao('inicio')" title="Ir para Início">🏠 Início</a>
-                <a class="menu-item vendas" onclick="mostrarSecao('vendas')" title="Ir para Vendas">📊 Vendas</a>
-                <a class="menu-item financeiro" onclick="mostrarSecao('financeiro')" title="Ir para Financeiro">💰
-                    Financeiro</a>
-                <a class="menu-item estoque" onclick="mostrarSecao('estoque')" title="Ir para Estoque">📦 Estoque</a>
+
+                <div class="menu-section" id="menu-section-vendas">
+                    <div class="menu-section-header" onclick="toggleMenuSection('vendas')">
+                        <span>📊 Vendas</span>
+                        <span class="menu-section-arrow" id="menu-arrow-vendas">›</span>
+                    </div>
+                    <div class="menu-submenu" id="menu-submenu-vendas"></div>
+                </div>
+
+                <div class="menu-section" id="menu-section-financeiro">
+                    <div class="menu-section-header" onclick="toggleMenuSection('financeiro')">
+                        <span>💰 Financeiro</span>
+                        <span class="menu-section-arrow" id="menu-arrow-financeiro">›</span>
+                    </div>
+                    <div class="menu-submenu" id="menu-submenu-financeiro"></div>
+                </div>
+
+                <div class="menu-section" id="menu-section-estoque">
+                    <div class="menu-section-header" onclick="toggleMenuSection('estoque')">
+                        <span>📦 Estoque</span>
+                        <span class="menu-section-arrow" id="menu-arrow-estoque">›</span>
+                    </div>
+                    <div class="menu-submenu" id="menu-submenu-estoque"></div>
+                </div>
             </nav>
 
             <div class="bottom-menu">
@@ -50,32 +70,44 @@
                     <span id="username">Usuário</span>
                     <span class="user-badge" id="userBadge">User</span>
                 </div>
+                <div class="header-search">
+                    <input type="text" id="searchDash" placeholder="🔍 Pesquisar dashboard..." oninput="pesquisarDashboard(this.value)">
+                    <div id="searchResults" class="search-results hidden"></div>
+                </div>
             </header>
 
             <!-- SEÇÃO: INÍCIO -->
             <section id="inicio" class="conteudo">
-                <div class="section-header">
-                    <h1>Escolha um Dashboard</h1>
-                    <p>Selecione uma opção para visualizar os dados</p>
+                <div class="inicio-welcome">
+                    <div>
+                        <h1>Olá, <span id="welcomeName"></span></h1>
+                        <p>Selecione um dashboard para começar</p>
+                    </div>
                 </div>
 
-                <div class="cards">
-                    <div class="card" onclick="abrirDashboard('vendas')">
-                        <span class="card-icon">📊</span>
-                        <h3>Vendas</h3>
-                        <p>Visualizar dados de vendas</p>
+                <div class="inicio-grid">
+                    <div class="inicio-card">
+                        <div class="inicio-card-header">
+                            <span>📊</span>
+                            <h3>Vendas</h3>
+                        </div>
+                        <div class="inicio-card-list" id="inicio-list-vendas"></div>
                     </div>
 
-                    <div class="card" onclick="abrirDashboard('estoque')">
-                        <span class="card-icon">📦</span>
-                        <h3>Estoque</h3>
-                        <p>Controle de produtos</p>
+                    <div class="inicio-card">
+                        <div class="inicio-card-header">
+                            <span>💰</span>
+                            <h3>Financeiro</h3>
+                        </div>
+                        <div class="inicio-card-list" id="inicio-list-financeiro"></div>
                     </div>
 
-                    <div class="card" onclick="abrirDashboard('financeiro')">
-                        <span class="card-icon">💰</span>
-                        <h3>Financeiro</h3>
-                        <p>Dados financeiros e relatórios</p>
+                    <div class="inicio-card">
+                        <div class="inicio-card-header">
+                            <span>📦</span>
+                            <h3>Estoque</h3>
+                        </div>
+                        <div class="inicio-card-list" id="inicio-list-estoque"></div>
                     </div>
                 </div>
             </section>
@@ -140,113 +172,52 @@
                 </div>
 
                 <!-- GERENCIAR DASHBOARDS POWER BI -->
-                <div class="config-box" id="dashboardConfigBox">
-                    <h2>📊 Dashboards Power BI</h2>
-                    <p class="box-description">Selecione uma seção para configurar o link do Power BI.</p>
-
-                    <div class="dash-accordion">
-
-                        <div class="dash-accordion-item" id="acc-vendas">
-                            <div class="dash-accordion-header" onclick="toggleDashConfig('vendas')">
-                                <div class="dash-accordion-info">
-                                    <span class="dash-accordion-icon">📊</span>
-                                    <span class="dash-accordion-name">Vendas</span>
-                                </div>
-                                <div class="dash-accordion-meta">
-                                    <span class="dash-status not-configured" id="dash-status-vendas">Não configurado</span>
-                                    <span class="dash-accordion-arrow" id="arrow-vendas">›</span>
-                                </div>
-                            </div>
-                            <div class="dash-accordion-body" id="acc-body-vendas">
-                                <div class="dash-accordion-body-inner">
-                                    <input type="text" id="dash-url-vendas" class="dash-input" placeholder="Cole o link ou código iframe do Power BI...">
-                                    <div class="dash-accordion-actions">
-                                        <button class="btn-save-dash" onclick="salvarDashboard('vendas')">Salvar</button>
-                                        <button class="btn-remove-dash" onclick="removerDashboard('vendas')">Remover</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="dash-accordion-item" id="acc-financeiro">
-                            <div class="dash-accordion-header" onclick="toggleDashConfig('financeiro')">
-                                <div class="dash-accordion-info">
-                                    <span class="dash-accordion-icon">💰</span>
-                                    <span class="dash-accordion-name">Financeiro</span>
-                                </div>
-                                <div class="dash-accordion-meta">
-                                    <span class="dash-status not-configured" id="dash-status-financeiro">Não configurado</span>
-                                    <span class="dash-accordion-arrow" id="arrow-financeiro">›</span>
-                                </div>
-                            </div>
-                            <div class="dash-accordion-body" id="acc-body-financeiro">
-                                <div class="dash-accordion-body-inner">
-                                    <input type="text" id="dash-url-financeiro" class="dash-input" placeholder="Cole o link ou código iframe do Power BI...">
-                                    <div class="dash-accordion-actions">
-                                        <button class="btn-save-dash" onclick="salvarDashboard('financeiro')">Salvar</button>
-                                        <button class="btn-remove-dash" onclick="removerDashboard('financeiro')">Remover</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="dash-accordion-item" id="acc-estoque">
-                            <div class="dash-accordion-header" onclick="toggleDashConfig('estoque')">
-                                <div class="dash-accordion-info">
-                                    <span class="dash-accordion-icon">📦</span>
-                                    <span class="dash-accordion-name">Estoque</span>
-                                </div>
-                                <div class="dash-accordion-meta">
-                                    <span class="dash-status not-configured" id="dash-status-estoque">Não configurado</span>
-                                    <span class="dash-accordion-arrow" id="arrow-estoque">›</span>
-                                </div>
-                            </div>
-                            <div class="dash-accordion-body" id="acc-body-estoque">
-                                <div class="dash-accordion-body-inner">
-                                    <input type="text" id="dash-url-estoque" class="dash-input" placeholder="Cole o link ou código iframe do Power BI...">
-                                    <div class="dash-accordion-actions">
-                                        <button class="btn-save-dash" onclick="salvarDashboard('estoque')">Salvar</button>
-                                        <button class="btn-remove-dash" onclick="removerDashboard('estoque')">Remover</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
+                <div class="config-box collapsible" id="dashboardConfigBox">
+                    <div class="config-box-header" onclick="toggleConfigBox('dashboardConfigBox')">
+                        <h2>📊 Dashboards Power BI</h2>
+                        <span class="config-box-arrow" id="arrow-dashboardConfigBox">›</span>
+                    </div>
+                    <div class="config-box-body" id="body-dashboardConfigBox">
+                        <p class="box-description">Adicione e gerencie os dashboards de cada seção.</p>
+                        <div id="dashConfigContent"></div>
                     </div>
                 </div>
 
                 <!-- CADASTRO DE USUÁRIO -->
-                <div class="config-box">
-                    <h2>➕ Cadastrar novo usuário</h2>
-                    <p class="box-description">Adicione um novo usuário ao sistema</p>
-
-                    <div class="form-group">
-                        <input type="text" id="novoUsuario" placeholder="Usuário" maxlength="20">
-                        <span class="form-hint">Mínimo 3 caracteres</span>
+                <div class="config-box collapsible" id="cadastroBox">
+                    <div class="config-box-header" onclick="toggleConfigBox('cadastroBox')">
+                        <h2>➕ Cadastrar novo usuário</h2>
+                        <span class="config-box-arrow" id="arrow-cadastroBox">›</span>
                     </div>
-
-                    <div class="form-group">
-                        <input type="password" id="novaSenha" placeholder="Senha" maxlength="20">
-                        <span class="form-hint">Mínimo 3 caracteres</span>
+                    <div class="config-box-body" id="body-cadastroBox">
+                        <p class="box-description">Adicione um novo usuário ao sistema</p>
+                        <div class="form-group">
+                            <input type="text" id="novoUsuario" placeholder="Usuário" maxlength="20">
+                            <span class="form-hint">Mínimo 3 caracteres</span>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="novaSenha" placeholder="Senha" maxlength="20">
+                            <span class="form-hint">Mínimo 3 caracteres</span>
+                        </div>
+                        <div class="form-group">
+                            <select id="tipoUsuario">
+                                <option value="gestor">📊 Gestor(a)</option>
+                                <option value="admin">👨‍💼 Administrador</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" onclick="cadastrarUsuario()">Cadastrar Usuário</button>
                     </div>
-
-                    <div class="form-group">
-                        <select id="tipoUsuario">
-                            <option value="gestor">📊 Gestor(a)</option>
-                            <option value="admin">👨‍💼 Administrador</option>
-                        </select>
-                    </div>
-
-                    <button class="btn-primary" onclick="cadastrarUsuario()">Cadastrar Usuário</button>
                 </div>
 
                 <!-- LISTA DE USUÁRIOS -->
-                <div class="config-box">
-                    <h2>👥 Usuários cadastrados</h2>
-                    <p class="box-description">Gerenciamento de usuários do sistema</p>
-
-                    <div id="usersList" class="users-list">
-                        <!-- Carregado via JavaScript -->
+                <div class="config-box collapsible" id="usuariosBox">
+                    <div class="config-box-header" onclick="toggleConfigBox('usuariosBox')">
+                        <h2>👥 Usuários cadastrados</h2>
+                        <span class="config-box-arrow" id="arrow-usuariosBox">›</span>
+                    </div>
+                    <div class="config-box-body" id="body-usuariosBox">
+                        <p class="box-description">Gerenciamento de usuários do sistema</p>
+                        <div id="usersList" class="users-list"></div>
                     </div>
                 </div>
             </section>
@@ -263,6 +234,10 @@
 
             <div class="modal-form">
                 <div class="modal-form-group">
+                    <label>Nome de usuário</label>
+                    <input type="text" id="editUserUsername" placeholder="Novo nome de usuário" maxlength="20" autocomplete="off">
+                </div>
+                <div class="modal-form-group">
                     <label>Nova senha</label>
                     <input type="password" id="editUserPassword" placeholder="Deixe em branco para não alterar" maxlength="20" autocomplete="new-password">
                 </div>
@@ -273,6 +248,11 @@
                         <option value="admin">👨‍💼 Administrador</option>
                     </select>
                 </div>
+            </div>
+
+            <div class="modal-form-group" id="permissoesGroup">
+                <label>Dashboards com acesso</label>
+                <div id="permissoesChecklist" class="permissoes-checklist"></div>
             </div>
 
             <div class="modal-actions">
@@ -297,7 +277,8 @@
     <!-- NOTIFICAÇÃO (TOAST) -->
     <div id="notification" class="notification hidden"></div>
 
-    <script src="dashboard.js"></script>
+    <script src="config.js"></script>
+    <script defer src="dashboard.js"></script>
 </body>
 
 </html>

@@ -6,8 +6,9 @@ const { authMiddleware } = require('../middleware/auth');
 // Login
 router.post('/login', authController.login);
 
-// Registrar
-router.post('/register', authController.registrar);
+// Registrar (apenas admin)
+const { authMiddleware, adminMiddleware } = require('../middleware/auth');
+router.post('/register', authMiddleware, adminMiddleware, authController.registrar);
 
 // Validar token
 router.get('/validar', authMiddleware, authController.validarToken);

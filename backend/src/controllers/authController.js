@@ -77,7 +77,6 @@ async function login(req, res) {
         return res.status(500).json({
             sucesso: false,
             mensagem: 'Erro interno do servidor',
-            erro: error.message
         });
     }
 }

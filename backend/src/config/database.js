@@ -25,11 +25,9 @@ async function query(text, params) {
     const start = Date.now();
     try {
         const result = await pool.query(text, params);
-        const duration = Date.now() - start;
-        console.log('✅ Query executada:', { text, duration, rows: result.rowCount });
         return result;
     } catch (error) {
-        console.error('❌ Erro na query:', error);
+        console.error('❌ Erro na query:', error.message);
         throw error;
     }
 }
@@ -40,38 +38,43 @@ async function initDatabase() {
         console.log('🔄 Iniciando banco de dados...');
 
         await query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        tipo VARCHAR(50) DEFAULT 'user',
-        email VARCHAR(255),
-        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-        console.log('✅ Tabela "users" pronta');
-
-        await query(`
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS ultimo_login TIMESTAMP;
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                tipo VARCHAR(50) DEFAULT 'user',
+                email VARCHAR(255),
+                criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         `);
-        console.log('✅ Coluna "ultimo_login" pronta');
+        console.log('✅ Tabela "users" pronta');
 
         await query(`
             CREATE TABLE IF NOT EXISTS dashboards (
                 id SERIAL PRIMARY KEY,
-                secao VARCHAR(50) UNIQUE NOT NULL,
+                secao VARCHAR(50) NOT NULL,
+                nome VARCHAR(100),
                 iframe_url TEXT,
+                ordem INT DEFAULT 0,
                 atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
         console.log('✅ Tabela "dashboards" pronta');
 
+        await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ultimo_login TIMESTAMP;`);
+        await query(`ALTER TABLE dashboards ADD COLUMN IF NOT EXISTS nome VARCHAR(100);`);
+        await query(`ALTER TABLE dashboards ADD COLUMN IF NOT EXISTS ordem INT DEFAULT 0;`);
+        await query(`UPDATE dashboards SET nome = secao WHERE nome IS NULL;`);
+
         await query(`
-            INSERT INTO dashboards (secao) VALUES ('vendas'), ('financeiro'), ('estoque')
-            ON CONFLICT (secao) DO NOTHING;
+            CREATE TABLE IF NOT EXISTS user_dashboard_permissions (
+                user_id INT REFERENCES users(id) ON DELETE CASCADE,
+                dashboard_id INT REFERENCES dashboards(id) ON DELETE CASCADE,
+                PRIMARY KEY (user_id, dashboard_id)
+            );
         `);
-        console.log('✅ Seções de dashboard inicializadas');
+        console.log('✅ Migrações aplicadas');
 
         const userExists = await query(
             'SELECT * FROM users WHERE username = $1',
