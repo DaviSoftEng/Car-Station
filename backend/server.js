@@ -16,8 +16,12 @@ const app = express();
 // ==================== SEGURANÇA ====================
 app.use(helmet());
 
+const origensPermitidas = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',')
+    : ['http://localhost:3000', 'http://localhost:5500', 'http://127.0.0.1:5500'];
+
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: origensPermitidas,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
