@@ -31,8 +31,8 @@ app.use(express.json());
 // Rate limit no login (5 tentativas por 15 min)
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 5,
-    message: { sucesso: false, mensagem: 'Muitas tentativas. Tente novamente em 15 minutos.' },
+    max: 20,
+    message: { sucesso: false, mensagem: 'Muitas tentativas de login. Tente novamente em 15 minutos.' },
     standardHeaders: true,
     legacyHeaders: false,
 });
