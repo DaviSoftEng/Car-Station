@@ -33,7 +33,7 @@ body {
 .logo {
   height: 60px;
   width: 60px;
-  border-radius: 50%;
+  border-radius: 12px;
   object-fit: cover;
 }
 
