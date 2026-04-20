@@ -249,7 +249,9 @@ function renderizarSubmenus() {
 // ==================== MENU MOBILE ====================
 function toggleMobileMenu() {
   const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
   sidebar.classList.toggle('mobile-open');
+  overlay.classList.toggle('active');
 }
 
 // ==================== CADASTRO DE USUÁRIO ====================

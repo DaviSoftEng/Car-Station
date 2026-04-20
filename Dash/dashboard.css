@@ -1502,13 +1502,13 @@ body {
   padding: 4px;
 }
 
-.menu-toggle span {
+.menu-toggle span,
+.menu-toggle-header span {
   display: block;
   width: 22px;
   height: 2px;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 2px;
-  transition: all 0.3s ease;
 }
 
 .menu-toggle-header {
@@ -1522,25 +1522,25 @@ body {
   flex-shrink: 0;
 }
 
-.menu-toggle-header span {
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+}
+
+.sidebar-overlay.active {
   display: block;
-  width: 22px;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 2px;
 }
 
 @media (max-width: 768px) {
-  .dashboard-container {
-    flex-direction: column;
-  }
-
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 260px;
+    width: 270px;
     z-index: 1000;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
@@ -1569,7 +1569,7 @@ body {
   }
 
   .header-search input {
-    width: 150px;
+    width: 140px;
     font-size: 12px;
   }
 }
