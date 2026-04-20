@@ -249,14 +249,7 @@ function renderizarSubmenus() {
 // ==================== MENU MOBILE ====================
 function toggleMobileMenu() {
   const sidebar = document.querySelector('.sidebar');
-
-  if (sidebar.classList.contains('mobile-closed')) {
-    sidebar.classList.remove('mobile-closed');
-    sidebar.classList.add('mobile-open');
-  } else {
-    sidebar.classList.remove('mobile-open');
-    sidebar.classList.add('mobile-closed');
-  }
+  sidebar.classList.toggle('mobile-open');
 }
 
 // ==================== CADASTRO DE USUÁRIO ====================
