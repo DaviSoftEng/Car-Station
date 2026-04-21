@@ -1626,12 +1626,20 @@ body {
     padding: 14px 16px;
     gap: 12px;
     justify-content: flex-start;
-    background: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, #2e7d5b, #3fa37a);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
 
   .menu-toggle-header {
     display: flex;
+  }
+
+  .menu-toggle-header span {
+    background: white;
+  }
+
+  #username {
+    color: white;
   }
 
   /* Busca ocupa o espaço restante */
@@ -1642,6 +1650,13 @@ body {
   .header-search input {
     width: 100%;
     font-size: 13px;
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.3);
+    color: white;
+  }
+
+  .header-search input::placeholder {
+    color: rgba(255,255,255,0.7);
   }
 
   /* Info do usuário menor */
