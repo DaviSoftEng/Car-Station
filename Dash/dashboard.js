@@ -248,30 +248,66 @@ function renderizarSubmenus() {
 
 // ==================== MENU MOBILE ====================
 function toggleMobileMenu() {
-  const sidebar = document.querySelector('.sidebar');
-  const overlay = document.getElementById('sidebarOverlay');
-  const isOpen = sidebar.style.left === '0px';
+  let mobileMenu = document.getElementById('mobile-menu-overlay');
 
-  if (isOpen) {
-    sidebar.style.left = '-100%';
-    overlay.style.display = 'none';
-  } else {
-    sidebar.style.position = 'fixed';
-    sidebar.style.top = '0';
-    sidebar.style.left = '0';
-    sidebar.style.height = '100vh';
-    sidebar.style.width = '80vw';
-    sidebar.style.maxWidth = '300px';
-    sidebar.style.zIndex = '9999';
-    sidebar.style.overflowY = 'auto';
-    sidebar.style.display = 'flex';
-    sidebar.style.flexDirection = 'column';
-    overlay.style.display = 'block';
-    overlay.style.position = 'fixed';
-    overlay.style.inset = '0';
-    overlay.style.background = 'rgba(0,0,0,0.5)';
-    overlay.style.zIndex = '100';
+  if (mobileMenu) {
+    document.body.removeChild(mobileMenu);
+    return;
   }
+
+  mobileMenu = document.createElement('div');
+  mobileMenu.id = 'mobile-menu-overlay';
+  mobileMenu.innerHTML = `
+    <div id="mobile-menu-panel">
+      <div class="mobile-menu-header">
+        <span>Car Station</span>
+        <button onclick="toggleMobileMenu()">✕</button>
+      </div>
+      <nav class="mobile-menu-nav">
+        <a onclick="toggleMobileMenu(); mostrarSecao('inicio')">🏠 Início</a>
+        <a onclick="toggleMobileMenu(); toggleMenuSection('vendas')">📊 Vendas</a>
+        <a onclick="toggleMobileMenu(); toggleMenuSection('financeiro')">💰 Financeiro</a>
+        <a onclick="toggleMobileMenu(); toggleMenuSection('estoque')">📦 Estoque</a>
+      </nav>
+      <div class="mobile-menu-bottom">
+        <a onclick="toggleMobileMenu(); mostrarSecao('configuracoes')">⚙️ Configurações</a>
+        <button onclick="confirmarSair()">🚪 Sair</button>
+      </div>
+    </div>
+    <div id="mobile-menu-backdrop" onclick="toggleMobileMenu()"></div>
+  `;
+
+  Object.assign(mobileMenu.style, {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    width: '100%',
+    height: '100%',
+    zIndex: '99999',
+    display: 'flex',
+  });
+
+  const panel = mobileMenu.querySelector('#mobile-menu-panel');
+  Object.assign(panel.style, {
+    width: '75vw',
+    maxWidth: '280px',
+    height: '100%',
+    background: 'linear-gradient(180deg, #0f3d3e 0%, #062f2f 100%)',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '0',
+    overflowY: 'auto',
+    zIndex: '2',
+    position: 'relative',
+  });
+
+  const backdrop = mobileMenu.querySelector('#mobile-menu-backdrop');
+  Object.assign(backdrop.style, {
+    flex: '1',
+    background: 'rgba(0,0,0,0.5)',
+  });
+
+  document.body.appendChild(mobileMenu);
 }
 
 // ==================== CADASTRO DE USUÁRIO ====================
