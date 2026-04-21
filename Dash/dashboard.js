@@ -270,7 +270,7 @@ function toggleMobileMenu() {
     overlay.style.position = 'fixed';
     overlay.style.inset = '0';
     overlay.style.background = 'rgba(0,0,0,0.5)';
-    overlay.style.zIndex = '9998';
+    overlay.style.zIndex = '100';
   }
 }
 
