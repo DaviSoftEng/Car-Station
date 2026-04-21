@@ -20,6 +20,7 @@ body {
 body {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
   background: linear-gradient(135deg, #1a3a52 0%, #2c5364 50%, #1a3a52 100%);
   background-attachment: fixed;

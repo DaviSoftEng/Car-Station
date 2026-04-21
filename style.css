@@ -9,6 +9,7 @@
 /* ==================== BODY ==================== */
 body {
   height: 100vh;
+  height: 100dvh;
   background: linear-gradient(135deg, #0f2027, #1c2b33, #2c5364);
   overflow: hidden;
 }
@@ -47,6 +48,7 @@ body {
 /* ==================== CONTAINER CENTRAL ==================== */
 .container {
   height: calc(100vh - 70px);
+  height: calc(100dvh - 70px);
   display: flex;
   justify-content: center;
   align-items: center;
