@@ -250,8 +250,28 @@ function renderizarSubmenus() {
 function toggleMobileMenu() {
   const sidebar = document.querySelector('.sidebar');
   const overlay = document.getElementById('sidebarOverlay');
-  sidebar.classList.toggle('mobile-open');
-  overlay.classList.toggle('active');
+  const isOpen = sidebar.style.left === '0px';
+
+  if (isOpen) {
+    sidebar.style.left = '-100%';
+    overlay.style.display = 'none';
+  } else {
+    sidebar.style.position = 'fixed';
+    sidebar.style.top = '0';
+    sidebar.style.left = '0';
+    sidebar.style.height = '100vh';
+    sidebar.style.width = '80vw';
+    sidebar.style.maxWidth = '300px';
+    sidebar.style.zIndex = '9999';
+    sidebar.style.overflowY = 'auto';
+    sidebar.style.display = 'flex';
+    sidebar.style.flexDirection = 'column';
+    overlay.style.display = 'block';
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.background = 'rgba(0,0,0,0.5)';
+    overlay.style.zIndex = '9998';
+  }
 }
 
 // ==================== CADASTRO DE USUÁRIO ====================
