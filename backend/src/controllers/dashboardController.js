@@ -1,7 +1,5 @@
 const { query } = require('../config/database');
 
-const SECOES_VALIDAS = ['vendas', 'financeiro', 'estoque'];
-
 // ==================== LISTAR TODOS ====================
 async function listarDashboards(req, res) {
     try {
@@ -31,8 +29,8 @@ async function criarDashboard(req, res) {
         const { secao } = req.params;
         const { nome, iframe_url } = req.body;
 
-        if (!SECOES_VALIDAS.includes(secao)) {
-            return res.status(400).json({ sucesso: false, mensagem: 'Seção inválida. Use: vendas, financeiro ou estoque' });
+        if (!secao || !secao.trim()) {
+            return res.status(400).json({ sucesso: false, mensagem: 'Seção inválida' });
         }
 
         if (!nome || !nome.trim()) {
