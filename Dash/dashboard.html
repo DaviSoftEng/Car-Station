@@ -38,21 +38,14 @@
                     <div class="menu-submenu" id="menu-submenu-vendas"></div>
                 </div>
 
-                <div class="menu-section" id="menu-section-financeiro">
-                    <div class="menu-section-header" onclick="toggleMenuSection('financeiro')">
-                        <span>💰 Financeiro</span>
-                        <span class="menu-section-arrow" id="menu-arrow-financeiro">›</span>
+                <div class="menu-section" id="menu-section-locacao">
+                    <div class="menu-section-header" onclick="toggleMenuSection('locacao')">
+                        <span>🚗 Locação</span>
+                        <span class="menu-section-arrow" id="menu-arrow-locacao">›</span>
                     </div>
-                    <div class="menu-submenu" id="menu-submenu-financeiro"></div>
+                    <div class="menu-submenu" id="menu-submenu-locacao"></div>
                 </div>
 
-                <div class="menu-section" id="menu-section-estoque">
-                    <div class="menu-section-header" onclick="toggleMenuSection('estoque')">
-                        <span>📦 Estoque</span>
-                        <span class="menu-section-arrow" id="menu-arrow-estoque">›</span>
-                    </div>
-                    <div class="menu-submenu" id="menu-submenu-estoque"></div>
-                </div>
             </nav>
 
             <div class="bottom-menu">
@@ -70,13 +63,13 @@
                 <button class="menu-toggle-header" onclick="toggleMobileMenu()" title="Menu">
                     <span></span><span></span><span></span>
                 </button>
-                <div class="header-search">
-                    <input type="text" id="searchDash" placeholder="🔍 Pesquisar dashboard..." oninput="pesquisarDashboard(this.value)">
-                    <div id="searchResults" class="search-results hidden"></div>
-                </div>
                 <div class="user-info">
                     <span id="username">Usuário</span>
                     <span class="user-badge" id="userBadge">User</span>
+                </div>
+                <div class="header-search">
+                    <input type="text" id="searchDash" placeholder="🔍 Pesquisar dashboard..." oninput="pesquisarDashboard(this.value)">
+                    <div id="searchResults" class="search-results hidden"></div>
                 </div>
             </header>
 
@@ -100,19 +93,12 @@
 
                     <div class="inicio-card">
                         <div class="inicio-card-header">
-                            <span>💰</span>
-                            <h3>Financeiro</h3>
+                            <span>🚗</span>
+                            <h3>Locação</h3>
                         </div>
-                        <div class="inicio-card-list" id="inicio-list-financeiro"></div>
+                        <div class="inicio-card-list" id="inicio-list-locacao"></div>
                     </div>
 
-                    <div class="inicio-card">
-                        <div class="inicio-card-header">
-                            <span>📦</span>
-                            <h3>Estoque</h3>
-                        </div>
-                        <div class="inicio-card-list" id="inicio-list-estoque"></div>
-                    </div>
                 </div>
             </section>
 
@@ -133,39 +119,23 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO: FINANCEIRO -->
-            <section id="financeiro" class="conteudo hidden">
-                <div class="section-header" id="section-header-financeiro">
-                    <h1>Financeiro</h1>
-                    <p>Análise financeira da empresa</p>
+            <!-- SEÇÃO: LOCAÇÃO -->
+            <section id="locacao" class="conteudo hidden">
+                <div class="section-header" id="section-header-locacao">
+                    <h1>Locação</h1>
+                    <p>Dashboard de locação em tempo real</p>
                 </div>
 
-                <div id="iframe-financeiro" class="iframe-container hidden"></div>
+                <div id="iframe-locacao" class="iframe-container hidden"></div>
 
-                <div id="placeholder-financeiro" class="placeholder">
-                    <div class="placeholder-icon">💰</div>
+                <div id="placeholder-locacao" class="placeholder">
+                    <div class="placeholder-icon">🚗</div>
                     <h2>Aguardando dados</h2>
-                    <p>Os gráficos financeiros aparecerão aqui em breve</p>
+                    <p>Os gráficos de locação aparecerão aqui em breve</p>
                     <small>Nenhum dashboard configurado ainda</small>
                 </div>
             </section>
 
-            <!-- SEÇÃO: ESTOQUE -->
-            <section id="estoque" class="conteudo hidden">
-                <div class="section-header" id="section-header-estoque">
-                    <h1>Estoque</h1>
-                    <p>Controle de estoque da empresa</p>
-                </div>
-
-                <div id="iframe-estoque" class="iframe-container hidden"></div>
-
-                <div id="placeholder-estoque" class="placeholder">
-                    <div class="placeholder-icon">📦</div>
-                    <h2>Aguardando dados</h2>
-                    <p>Os dados de estoque aparecerão aqui em breve</p>
-                    <small>Nenhum dashboard configurado ainda</small>
-                </div>
-            </section>
 
 
             <!-- SEÇÃO: CONFIGURAÇÕES -->

@@ -125,7 +125,7 @@ function pesquisarDashboard(termo) {
     return;
   }
 
-  const ICONES = { vendas: '📊', financeiro: '💰', estoque: '📦' };
+  const ICONES = { vendas: '📊', locacao: '🚗' };
   const encontrados = [];
 
   Object.entries(dashboardsData).forEach(([secao, dashes]) => {
@@ -182,8 +182,7 @@ function mostrarSecao(secaoId) {
 // ==================== SIDEBAR ACCORDION ====================
 const SECOES_INFO = [
   { id: 'vendas', nome: 'Vendas', icone: '📊' },
-  { id: 'financeiro', nome: 'Financeiro', icone: '💰' },
-  { id: 'estoque', nome: 'Estoque', icone: '📦' }
+  { id: 'locacao', nome: 'Locação', icone: '🚗' }
 ];
 
 function abrirMenuSection(secao) {
@@ -266,8 +265,7 @@ function toggleMobileMenu() {
       <nav class="mobile-menu-nav">
         <a onclick="toggleMobileMenu(); mostrarSecao('inicio')">🏠 Início</a>
         <a onclick="toggleMobileMenu(); toggleMenuSection('vendas')">📊 Vendas</a>
-        <a onclick="toggleMobileMenu(); toggleMenuSection('financeiro')">💰 Financeiro</a>
-        <a onclick="toggleMobileMenu(); toggleMenuSection('estoque')">📦 Estoque</a>
+        <a onclick="toggleMobileMenu(); toggleMenuSection('locacao')">🚗 Locação</a>
       </nav>
       <div class="mobile-menu-bottom">
         <a onclick="toggleMobileMenu(); mostrarSecao('configuracoes')">⚙️ Configurações</a>
@@ -483,7 +481,7 @@ async function abrirEditarUsuario(id, username, tipo) {
       if (todosOsDashes.length === 0) {
         checklist.innerHTML = '<p style="font-size:12px;color:#999;font-style:italic;">Nenhum dashboard cadastrado ainda</p>';
       } else {
-        const ICONES = { vendas: '📊', financeiro: '💰', estoque: '📦' };
+        const ICONES = { vendas: '📊', locacao: '🚗' };
         checklist.innerHTML = todosOsDashes.map(d => `
           <label class="permissao-item">
             <input type="checkbox" value="${d.id}" ${permitidos.includes(d.id) ? 'checked' : ''}>
@@ -595,7 +593,7 @@ async function removerUsuario(id, username) {
 }
 
 // ==================== DASHBOARDS POWER BI ====================
-let dashboardsData = { vendas: [], financeiro: [], estoque: [] };
+let dashboardsData = { vendas: [], locacao: [] };
 
 function extrairUrl(input) {
   const trimmed = input.trim();
@@ -643,7 +641,7 @@ async function carregarDashboards() {
     const data = await response.json();
     if (!data.sucesso) return;
 
-    dashboardsData = { vendas: [], financeiro: [], estoque: [] };
+    dashboardsData = { vendas: [], locacao: [], financeiro: [], estoque: [] };
     data.dashboards.forEach(d => {
       if (dashboardsData[d.secao]) dashboardsData[d.secao].push(d);
     });
@@ -824,6 +822,10 @@ window.addEventListener('DOMContentLoaded', async function () {
 
   // Aplicar permissões
   aplicarPermissoes();
+
+  // Renderiza submenus imediatamente com dados vazios (antes da API responder)
+  renderizarSubmenus();
+  renderizarInicio();
 
   // Carregar configs dos dashboards (todos os usuários)
   await carregarDashboards();
