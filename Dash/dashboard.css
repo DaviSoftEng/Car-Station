@@ -378,6 +378,10 @@ body {
 }
 
 /* ==================== TELA INICIAL ==================== */
+#inicio.conteudo {
+  background: linear-gradient(135deg, #1a3a52 0%, #2c5364 50%, #1a3a52 100%);
+}
+
 .inicio-welcome {
   margin-bottom: 32px;
 }
