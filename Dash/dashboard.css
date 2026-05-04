@@ -310,7 +310,7 @@ body {
 
 /* ==================== MAIN HEADER ==================== */
 .main-header {
-  background: linear-gradient(135deg, #2e7d5b, #3fa37a);
+  background: #1e2235;
   padding: 20px 30px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   display: flex;
