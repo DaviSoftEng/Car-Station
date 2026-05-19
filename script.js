@@ -1,148 +1,138 @@
-// ==================== UI - MENSAGENS ====================
-function showError(message) {
-  const container = document.getElementById('error-container');
-  container.innerHTML = `
-    <div class="error-message">
-      ${message}
-    </div>
-  `;
+const API = 'https://car-station.onrender.com/api';
+let tokenTemporario = null;
 
-  // Auto remover erro após 5 segundos
-  setTimeout(() => {
-    container.innerHTML = '';
-  }, 5000);
+// ==================== UI ====================
+function showError(id, message) {
+  const container = document.getElementById(id);
+  container.innerHTML = `<div class="error-message">${message}</div>`;
+  setTimeout(() => { container.innerHTML = ''; }, 5000);
 }
 
-function clearError() {
-  document.getElementById('error-container').innerHTML = '';
+function clearError(id) {
+  document.getElementById(id).innerHTML = '';
 }
 
-// ==================== UI - VALIDAÇÃO ====================
-function validateLogin(user, pass) {
-  // Validar campos vazios
-  if (!user.trim()) {
-    showError('Digite seu usuário');
-    return false;
-  }
-
-  if (!pass.trim()) {
-    showError('Digite sua senha');
-    return false;
-  }
-
-  // Validar comprimento mínimo
-  if (user.trim().length < 3) {
-    showError('Usuário deve ter no mínimo 3 caracteres');
-    return false;
-  }
-
-  if (pass.length < 3) {
-    showError('Senha deve ter no mínimo 3 caracteres');
-    return false;
-  }
-
-  return true;
-}
-
-// ==================== TOGGLE DE SENHA ====================
-function togglePassword() {
-  const passInput = document.getElementById('pass');
-  const eyeIcon = document.getElementById('eyeIcon');
-
-  if (passInput.type === 'password') {
-    passInput.type = 'text';
-    eyeIcon.style.opacity = '1';
+function togglePassword(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.style.opacity = '1';
   } else {
-    passInput.type = 'password';
-    eyeIcon.style.opacity = '0.6';
+    input.type = 'password';
+    icon.style.opacity = '0.6';
   }
 }
 
 // ==================== LOGIN ====================
 async function login() {
-  const userInput = document.getElementById('user');
-  const passInput = document.getElementById('pass');
+  const email = document.getElementById('user').value.trim();
+  const pass = document.getElementById('pass').value;
   const loginBtn = document.getElementById('login-btn');
   const btnText = document.getElementById('btn-text');
   const btnLoader = document.getElementById('btn-loader');
 
-  const user = userInput.value.trim();
-  const pass = passInput.value;
+  clearError('error-container');
 
-  // Limpar erro anterior
-  clearError();
+  if (!email) return showError('error-container', 'Digite seu email');
+  if (!pass) return showError('error-container', 'Digite sua senha');
 
-  // Validar
-  if (!validateLogin(user, pass)) {
-    return;
-  }
-
-  // Desabilitar botão e mostrar loader
   loginBtn.disabled = true;
   btnText.style.opacity = '0';
   btnLoader.style.display = 'block';
 
-  // Simular delay de rede (remover quando integrar com backend)
   try {
-    const response = await fetch('https://car-station.onrender.com/api/auth/login', {
+    const response = await fetch(`${API}/auth/login`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        username: user,
-        password: pass
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass })
     });
 
     const data = await response.json();
 
-    console.log('Resposta do backend:', data);
-
     if (data.sucesso) {
-      // 🔥 LOGIN REAL
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', data.usuario.username);
       localStorage.setItem('userType', data.usuario.tipo);
 
+      if (data.primeiro_acesso) {
+        tokenTemporario = data.token;
+        document.getElementById('step-login').style.display = 'none';
+        document.getElementById('step-senha').style.display = 'block';
+        document.getElementById('nova-senha').focus();
+      } else {
+        window.location.href = 'Dash/dashboard.html';
+      }
+    } else {
+      throw new Error(data.mensagem);
+    }
+
+  } catch (error) {
+    showError('error-container', error.message || 'Erro ao fazer login');
+    document.getElementById('pass').value = '';
+  } finally {
+    loginBtn.disabled = false;
+    btnText.style.opacity = '1';
+    btnLoader.style.display = 'none';
+  }
+}
+
+// ==================== DEFINIR SENHA ====================
+async function definirSenha() {
+  const novaSenha = document.getElementById('nova-senha').value;
+  const confirmaSenha = document.getElementById('confirma-senha').value;
+  const btn = document.getElementById('senha-btn');
+  const btnText = document.getElementById('senha-btn-text');
+  const btnLoader = document.getElementById('senha-btn-loader');
+
+  clearError('error-container-senha');
+
+  if (!novaSenha || novaSenha.length < 6) return showError('error-container-senha', 'A senha deve ter no mínimo 6 caracteres');
+  if (novaSenha !== confirmaSenha) return showError('error-container-senha', 'As senhas não coincidem');
+
+  btn.disabled = true;
+  btnText.style.opacity = '0';
+  btnLoader.style.display = 'block';
+
+  try {
+    const token = tokenTemporario || localStorage.getItem('token');
+    const response = await fetch(`${API}/auth/definir-senha`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ novaSenha })
+    });
+
+    const data = await response.json();
+
+    if (data.sucesso) {
       window.location.href = 'Dash/dashboard.html';
     } else {
       throw new Error(data.mensagem);
     }
 
   } catch (error) {
-    loginBtn.disabled = false;
+    showError('error-container-senha', error.message || 'Erro ao definir senha');
+  } finally {
+    btn.disabled = false;
     btnText.style.opacity = '1';
     btnLoader.style.display = 'none';
-
-    showError(error.message || 'Erro ao fazer login');
-
-    passInput.value = '';
-    passInput.focus();
   }
 }
 
-// ==================== ENTER PARA LOGIN ====================
+// ==================== EVENTOS ====================
 document.addEventListener('DOMContentLoaded', function () {
-  // Enter no campo de senha = login
   const passInput = document.getElementById('pass');
-  passInput.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      login();
-    }
-  });
-
-  // Enter no campo de usuário = vai para senha
   const userInput = document.getElementById('user');
-  userInput.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      passInput.focus();
-    }
-  });
 
-  // Limpar erro quando começar a digitar
-  userInput.addEventListener('input', clearError);
-  passInput.addEventListener('input', clearError);
+  passInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); login(); } });
+  userInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); passInput.focus(); } });
+  userInput.addEventListener('input', () => clearError('error-container'));
+  passInput.addEventListener('input', () => clearError('error-container'));
+
+  document.getElementById('nova-senha')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('confirma-senha').focus(); }
+  });
+  document.getElementById('confirma-senha')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); definirSenha(); }
+  });
 });

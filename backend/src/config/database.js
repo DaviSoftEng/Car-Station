@@ -63,6 +63,7 @@ async function initDatabase() {
         console.log('✅ Tabela "dashboards" pronta');
 
         await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ultimo_login TIMESTAMP;`);
+        await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS primeiro_acesso BOOLEAN DEFAULT TRUE;`);
         await query(`ALTER TABLE dashboards ADD COLUMN IF NOT EXISTS nome VARCHAR(100);`);
         await query(`ALTER TABLE dashboards ADD COLUMN IF NOT EXISTS ordem INT DEFAULT 0;`);
         await query(`UPDATE dashboards SET nome = secao WHERE nome IS NULL;`);

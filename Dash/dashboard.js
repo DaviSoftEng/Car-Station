@@ -338,10 +338,16 @@ function validarNovoUsuario(usuario, senha, tipo) {
 
 async function cadastrarUsuario() {
   const usuario = document.getElementById('novoUsuario').value.trim();
+  const email = document.getElementById('novoEmail').value.trim();
   const senha = document.getElementById('novaSenha').value;
   const tipo = document.getElementById('tipoUsuario').value;
 
   if (!validarNovoUsuario(usuario, senha, tipo)) {
+    return;
+  }
+
+  if (!email) {
+    showNotification('Informe o email do usuário', 'error');
     return;
   }
 
@@ -353,13 +359,14 @@ async function cadastrarUsuario() {
     const response = await fetch(`${API_BASE}/users`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ username: usuario, password: senha, tipo })
+      body: JSON.stringify({ username: usuario, email, password: senha, tipo })
     });
 
     const data = await response.json();
 
     if (data.sucesso) {
       document.getElementById('novoUsuario').value = '';
+      document.getElementById('novoEmail').value = '';
       document.getElementById('novaSenha').value = '';
       document.getElementById('tipoUsuario').value = 'gestor';
 
@@ -428,7 +435,7 @@ async function listarUsuarios() {
                 ${u.tipo === 'admin' ? '👨‍💼 Admin' : u.tipo === 'diretor' ? '🏆 Diretor(a)' : '📊 Gestor(a)'}
               </span>
             </div>
-            <span class="user-item-login">Último acesso: ${ultimoLogin}</span>
+            <span class="user-item-login">${u.email ? u.email + ' · ' : ''}Último acesso: ${ultimoLogin}</span>
           </div>
           <div class="user-item-actions">
             <button class="btn-edit" onclick="abrirEditarUsuario(${u.id}, '${u.username}', '${u.tipo}')">

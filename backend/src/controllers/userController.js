@@ -27,38 +27,37 @@ async function criarUsuario(req, res) {
     try {
         const { username, password, tipo, email } = req.body;
 
-        if (!username || !password) {
+        if (!username || !password || !email) {
             return res.status(400).json({
                 sucesso: false,
-                mensagem: 'Usuário e senha são obrigatórios',
+                mensagem: 'Nome, email e senha são obrigatórios',
             });
         }
 
-        // 🔥 CORREÇÃO AQUI
         if (!['gestor', 'diretor', 'admin'].includes(tipo)) {
             return res.status(400).json({
                 sucesso: false,
-                mensagem: 'Tipo deve ser "gestor" ou "admin"',
+                mensagem: 'Tipo inválido',
             });
         }
 
         const usuarioExiste = await query(
-            'SELECT * FROM users WHERE username = $1',
-            [username]
+            'SELECT * FROM users WHERE username = $1 OR email = $2',
+            [username, email.toLowerCase().trim()]
         );
 
         if (usuarioExiste.rows.length > 0) {
             return res.status(409).json({
                 sucesso: false,
-                mensagem: 'Usuário já existe',
+                mensagem: 'Usuário ou email já existe',
             });
         }
 
         const senhaHasheada = await bcrypt.hash(password, 10);
 
         const resultado = await query(
-            'INSERT INTO users (username, password, tipo, email) VALUES ($1, $2, $3, $4) RETURNING id, username, tipo, email, criado_em',
-            [username, senhaHasheada, tipo, email || null]
+            'INSERT INTO users (username, password, tipo, email, primeiro_acesso) VALUES ($1, $2, $3, $4, TRUE) RETURNING id, username, tipo, email, criado_em',
+            [username, senhaHasheada, tipo, email.toLowerCase().trim()]
         );
 
         const novoUsuario = resultado.rows[0];
