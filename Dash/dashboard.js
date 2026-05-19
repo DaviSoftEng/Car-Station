@@ -702,12 +702,23 @@ function renderizarConfigDashboards() {
           ${dashes.length === 0
             ? '<p class="dash-list-empty">Nenhum dashboard configurado</p>'
             : dashes.map(d => `
-              <div class="dash-list-item">
+              <div class="dash-list-item" id="dash-item-${d.id}">
                 <div class="dash-list-item-info">
                   <span class="dash-list-item-nome">${d.nome}</span>
                   <span class="dash-list-item-status">${d.iframe_url ? '✓ URL configurada' : '⚠ Sem URL'}</span>
                 </div>
-                <button class="btn-remove-dash" onclick="confirmarDeletarDashboard(${d.id}, '${d.nome}', '${secao}')">Remover</button>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn-edit-dash" onclick="abrirEditarDash(${d.id}, '${escapeHtml(d.nome)}', '${escapeHtml(d.iframe_url || '')}', '${secao}')">Editar</button>
+                  <button class="btn-remove-dash" onclick="confirmarDeletarDashboard(${d.id}, '${d.nome}', '${secao}')">Remover</button>
+                </div>
+              </div>
+              <div class="dash-add-form hidden" id="dash-edit-form-${d.id}">
+                <input type="text" id="dash-edit-nome-${d.id}" class="dash-input" placeholder="Nome do dashboard">
+                <input type="text" id="dash-edit-url-${d.id}" class="dash-input" placeholder="Link ou código iframe do Power BI">
+                <div class="dash-add-actions">
+                  <button class="btn-save-dash" onclick="salvarEdicaoDash(${d.id}, '${secao}')">Salvar</button>
+                  <button class="btn-cancel-dash" onclick="fecharEditarDash(${d.id})">Cancelar</button>
+                </div>
               </div>`).join('')
           }
         </div>
@@ -722,6 +733,60 @@ function renderizarConfigDashboards() {
       </div>
     `;
   }).join('');
+}
+
+function abrirEditarDash(id, nome, url, secao) {
+  // Fecha qualquer edição aberta
+  document.querySelectorAll('[id^="dash-edit-form-"]').forEach(f => f.classList.add('hidden'));
+
+  const form = document.getElementById(`dash-edit-form-${id}`);
+  if (!form) return;
+
+  document.getElementById(`dash-edit-nome-${id}`).value = nome;
+  document.getElementById(`dash-edit-url-${id}`).value = url;
+  form.classList.remove('hidden');
+  document.getElementById(`dash-edit-nome-${id}`).focus();
+}
+
+function fecharEditarDash(id) {
+  document.getElementById(`dash-edit-form-${id}`)?.classList.add('hidden');
+}
+
+async function salvarEdicaoDash(id, secao) {
+  const nome = document.getElementById(`dash-edit-nome-${id}`)?.value.trim();
+  const urlRaw = document.getElementById(`dash-edit-url-${id}`)?.value.trim();
+  const url = extrairUrl(urlRaw || '');
+
+  if (!nome) {
+    showNotification('Informe o nome do dashboard', 'error');
+    return;
+  }
+
+  const btn = document.querySelector(`#dash-edit-form-${id} .btn-save-dash`);
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+
+  try {
+    const response = await fetch(`${API_BASE}/dashboards/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ nome, iframe_url: url || null })
+    });
+
+    const data = await response.json();
+
+    if (data.sucesso) {
+      showNotification('Dashboard atualizado!', 'success');
+      await carregarDashboards();
+    } else {
+      showNotification(data.mensagem || 'Erro ao atualizar', 'error');
+    }
+  } catch {
+    showNotification('Erro de conexão com o servidor', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Salvar';
+  }
 }
 
 function toggleAddForm(secao) {
