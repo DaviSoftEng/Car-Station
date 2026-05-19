@@ -345,6 +345,10 @@ body {
   background: #ff9500;
 }
 
+.user-badge.diretor {
+  background: #9b59b6;
+}
+
 /* ==================== CONTEÚDO ==================== */
 .conteudo {
   flex: 1;
@@ -703,6 +707,10 @@ body {
 
 .user-item-type.user {
   background: #95b3ff;
+}
+
+.user-item-type.diretor {
+  background: #9b59b6;
 }
 
 .user-item-actions {

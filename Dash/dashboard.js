@@ -100,6 +100,9 @@ function aplicarPermissoes() {
   if (tipoUsuario === 'admin') {
     userBadge.textContent = 'Admin';
     userBadge.classList.add('admin');
+  } else if (tipoUsuario === 'diretor') {
+    userBadge.textContent = 'Diretor';
+    userBadge.classList.add('diretor');
   } else {
     userBadge.textContent = 'Gestor';
   }
@@ -421,8 +424,8 @@ async function listarUsuarios() {
           <div class="user-item-info">
             <div class="user-item-main">
               <span class="user-item-name">👤 ${escapeHtml(u.username)}</span>
-              <span class="user-item-type ${u.tipo === 'admin' ? 'admin' : 'user'}">
-                ${u.tipo === 'admin' ? '👨‍💼 Admin' : '📊 Gestor(a)'}
+              <span class="user-item-type ${u.tipo === 'admin' ? 'admin' : u.tipo === 'diretor' ? 'diretor' : 'user'}">
+                ${u.tipo === 'admin' ? '👨‍💼 Admin' : u.tipo === 'diretor' ? '🏆 Diretor(a)' : '📊 Gestor(a)'}
               </span>
             </div>
             <span class="user-item-login">Último acesso: ${ultimoLogin}</span>
@@ -462,7 +465,7 @@ async function abrirEditarUsuario(id, username, tipo) {
   const permissoesGroup = document.getElementById('permissoesGroup');
   const checklist = document.getElementById('permissoesChecklist');
 
-  if (tipo === 'gestor') {
+  if (tipo === 'gestor' || tipo === 'diretor') {
     permissoesGroup.classList.remove('hidden');
     checklist.innerHTML = '<p style="font-size:12px;color:#999;">Carregando...</p>';
 

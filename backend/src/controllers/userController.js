@@ -35,7 +35,7 @@ async function criarUsuario(req, res) {
         }
 
         // 🔥 CORREÇÃO AQUI
-        if (!['gestor', 'admin'].includes(tipo)) {
+        if (!['gestor', 'diretor', 'admin'].includes(tipo)) {
             return res.status(400).json({
                 sucesso: false,
                 mensagem: 'Tipo deve ser "gestor" ou "admin"',
@@ -138,7 +138,7 @@ async function editarUsuario(req, res) {
             });
         }
 
-        if (tipo && !['gestor', 'admin'].includes(tipo)) {
+        if (tipo && !['gestor', 'diretor', 'admin'].includes(tipo)) {
             return res.status(400).json({
                 sucesso: false,
                 mensagem: 'Tipo inválido',
